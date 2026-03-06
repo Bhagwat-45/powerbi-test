@@ -1,0 +1,146 @@
+table Users
+	lineageTag: 9b774d33-19a1-4390-a4f8-53aadf6a1744
+
+	column id
+		dataType: int64
+		formatString: 0
+		lineageTag: 6753dd95-2803-45b3-a70d-f61938f83568
+		summarizeBy: none
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+	column name
+		dataType: string
+		lineageTag: 034517f1-6fac-4c6a-af5d-3cf323af6d6a
+		summarizeBy: none
+		sourceColumn: name
+
+		annotation SummarizationSetBy = Automatic
+
+	column username
+		dataType: string
+		lineageTag: 918a925c-f997-4094-968e-408d0b8cc34d
+		summarizeBy: none
+		sourceColumn: username
+
+		annotation SummarizationSetBy = Automatic
+
+	column email
+		dataType: string
+		lineageTag: 1434ae83-ee84-4093-845a-f955dea4252b
+		summarizeBy: none
+		sourceColumn: email
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'address.street'
+		dataType: string
+		lineageTag: d7d75ea4-7af4-4624-9f3f-72803cd688bb
+		summarizeBy: none
+		sourceColumn: address.street
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'address.suite'
+		dataType: string
+		lineageTag: 62eef99c-c224-4956-9f98-3d755323ac65
+		summarizeBy: none
+		sourceColumn: address.suite
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'address.city'
+		dataType: string
+		lineageTag: 1fe63767-ecd3-4b58-9318-4e6fc9d31de3
+		summarizeBy: none
+		sourceColumn: address.city
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'address.zipcode'
+		dataType: string
+		lineageTag: bd7ec5a6-c332-463b-9408-81f78e491974
+		summarizeBy: none
+		sourceColumn: address.zipcode
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'address.geo.lat'
+		dataType: double
+		lineageTag: 8c1a8f4a-7b6a-4079-84f6-d11cf4a77803
+		summarizeBy: none
+		sourceColumn: address.geo.lat
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'address.geo.lng'
+		dataType: double
+		lineageTag: a99436e4-67b3-4055-98a7-2049f3e2e04d
+		summarizeBy: none
+		sourceColumn: address.geo.lng
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column phone
+		dataType: string
+		lineageTag: d61024cd-7b8c-4ae3-9714-84856b674ab4
+		summarizeBy: none
+		sourceColumn: phone
+
+		annotation SummarizationSetBy = Automatic
+
+	column website
+		dataType: string
+		lineageTag: c1b54bf8-a5b9-4753-ac31-d0be6163bfee
+		summarizeBy: none
+		sourceColumn: website
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'company.name'
+		dataType: string
+		lineageTag: 9ed19bbc-c261-4b4b-bc22-3e53242f785d
+		summarizeBy: none
+		sourceColumn: company.name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'company.catchPhrase'
+		dataType: string
+		lineageTag: 700216e6-02de-4dac-a983-1932a4585335
+		summarizeBy: none
+		sourceColumn: company.catchPhrase
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'company.bs'
+		dataType: string
+		lineageTag: 7dfcd9d2-aca0-44da-8365-6bfb93108e20
+		summarizeBy: none
+		sourceColumn: company.bs
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Users = m
+		mode: import
+		source =
+				let
+				    Source = Json.Document(Web.Contents("https://jsonplaceholder.typicode.com/users")),
+				    #"Converted to Table" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+				    #"Expanded Column1" = Table.ExpandRecordColumn(#"Converted to Table", "Column1", {"id", "name", "username", "email", "address", "phone", "website", "company"}, {"id", "name", "username", "email", "address", "phone", "website", "company"}),
+				    #"Expanded address" = Table.ExpandRecordColumn(#"Expanded Column1", "address", {"street", "suite", "city", "zipcode", "geo"}, {"address.street", "address.suite", "address.city", "address.zipcode", "address.geo"}),
+				    #"Expanded address.geo" = Table.ExpandRecordColumn(#"Expanded address", "address.geo", {"lat", "lng"}, {"address.geo.lat", "address.geo.lng"}),
+				    #"Expanded company" = Table.ExpandRecordColumn(#"Expanded address.geo", "company", {"name", "catchPhrase", "bs"}, {"company.name", "company.catchPhrase", "company.bs"}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Expanded company",{{"id", Int64.Type}, {"name", type text}, {"username", type text}, {"email", type text}, {"address.street", type text}, {"address.suite", type text}, {"address.city", type text}, {"address.zipcode", type text}, {"address.geo.lat", type number}, {"address.geo.lng", type number}, {"phone", type text}, {"website", type text}, {"company.name", type text}, {"company.catchPhrase", type text}, {"company.bs", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

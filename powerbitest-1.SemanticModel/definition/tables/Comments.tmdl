@@ -1,0 +1,60 @@
+table Comments
+	lineageTag: fe2e19e2-bba4-41d0-b80c-f66463f9b1a3
+
+	column postId
+		dataType: int64
+		formatString: 0
+		lineageTag: 3e6dc98c-0d11-4560-b0b5-0f4a08130802
+		summarizeBy: none
+		sourceColumn: postId
+
+		annotation SummarizationSetBy = Automatic
+
+	column id
+		dataType: int64
+		formatString: 0
+		lineageTag: 801a3f8f-2413-49fc-8499-106a334167b2
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+	column name
+		dataType: string
+		lineageTag: f16559b8-515a-4e95-8ce0-e678b5527922
+		summarizeBy: none
+		sourceColumn: name
+
+		annotation SummarizationSetBy = Automatic
+
+	column email
+		dataType: string
+		lineageTag: 39d370e6-0f06-4362-8d6b-309da5e4d60b
+		summarizeBy: none
+		sourceColumn: email
+
+		annotation SummarizationSetBy = Automatic
+
+	column body
+		dataType: string
+		lineageTag: 26767257-cdb0-47a2-88d4-dcf175274d54
+		summarizeBy: none
+		sourceColumn: body
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Comments = m
+		mode: import
+		source =
+				let
+				    Source = Json.Document(Web.Contents("https://jsonplaceholder.typicode.com/comments")),
+				    #"Converted to Table" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+				    #"Expanded Column1" = Table.ExpandRecordColumn(#"Converted to Table", "Column1", {"postId", "id", "name", "email", "body"}, {"postId", "id", "name", "email", "body"}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Expanded Column1",{{"postId", Int64.Type}, {"id", Int64.Type}, {"name", type text}, {"email", type text}, {"body", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

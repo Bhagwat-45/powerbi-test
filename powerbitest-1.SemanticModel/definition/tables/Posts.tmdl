@@ -1,0 +1,52 @@
+table Posts
+	lineageTag: c92a085d-3d5c-418c-a482-f1d4613820b0
+
+	column userId
+		dataType: int64
+		formatString: 0
+		lineageTag: a1d63afe-2e17-47f3-a182-92ecde717822
+		summarizeBy: none
+		sourceColumn: userId
+
+		annotation SummarizationSetBy = Automatic
+
+	column id
+		dataType: int64
+		formatString: 0
+		lineageTag: b48c66eb-3a83-4804-8547-823cf13cd841
+		summarizeBy: none
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+	column title
+		dataType: string
+		lineageTag: 9c809f18-63e3-43ac-a6f0-1130fc5f7a04
+		summarizeBy: none
+		sourceColumn: title
+
+		annotation SummarizationSetBy = Automatic
+
+	column body
+		dataType: string
+		lineageTag: bce3d937-fac0-4e24-86b4-bf219c62cddf
+		summarizeBy: none
+		sourceColumn: body
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Posts = m
+		mode: import
+		source =
+				let
+				    Source = Json.Document(Web.Contents("https://jsonplaceholder.typicode.com/posts")),
+				    #"Converted to Table" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+				    #"Expanded Column1" = Table.ExpandRecordColumn(#"Converted to Table", "Column1", {"userId", "id", "title", "body"}, {"userId", "id", "title", "body"}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Expanded Column1",{{"userId", Int64.Type}, {"id", Int64.Type}, {"title", type text}, {"body", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

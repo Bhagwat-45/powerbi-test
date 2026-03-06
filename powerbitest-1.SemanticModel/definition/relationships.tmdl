@@ -1,0 +1,8 @@
+relationship 160da368-fceb-1b00-a5b1-9dbdabec4256
+	fromColumn: Posts.userId
+	toColumn: Users.id
+
+relationship d81d3b4a-aa06-22f7-532c-604324ae1947
+	fromColumn: Comments.postId
+	toColumn: Posts.id
+
